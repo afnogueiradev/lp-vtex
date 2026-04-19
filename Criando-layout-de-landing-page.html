@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+  'use strict';
+
+  // Idempotency: skip if already initialized (e.g., server-side injection
+  // followed by client-side inject-javascript via the Bloks webview component).
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  // --- Transport Layer ---
+
+  function hasIOSBridge() {
+    return !!(window.webkit &&
+              window.webkit.messageHandlers &&
+              window.webkit.messageHandlers[HANDLER_NAME]);
+  }
+
+  function hasAndroidBridge() {
+    return !!(window[ANDROID_BRIDGE_NAME] &&
+              typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+  }
+
+  function isInIframe() {
+    return !!(window.parent && window.parent !== window);
+  }
+
+  function sendEvent(eventName, payload) {
+    var message = {
+      type: eventName,
+      payload: payload || {},
+      timestamp: Date.now()
+    };
+
+    if (hasIOSBridge()) {
+      try {
+        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+      } catch (e) { /* ignore */ }
+      return;
+    }
+
+    if (hasAndroidBridge()) {
+    try {
+      var p = payload || {};
+      p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+      window[ANDROID_BRIDGE_NAME].postEvent(
+        eventName,
+        JSON.stringify(p)
+      );
+    } catch (e) { /* ignore */ }
+    return;
+  }
+
+    if (isInIframe()) {
+      try {
+        window.parent.postMessage(message, '*');
+      } catch (e) { /* ignore */ }
+      return;
+    }
+  }
+
+  // --- rAF Game-Ready Detection ---
+
+  function onFrame() {
+    if (gameReadySent) return;
+
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) {
+      gameReadySent = true;
+      sendEvent('game_ready', {
+        frame_count: frameCount,
+        detected_at: Date.now()
+      });
+      return;
+    }
+
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+            gameReadySent = true;
+            sendEvent('game_ready', {
+              frame_count: frameCount,
+              detected_at: Date.now()
+            });
+          }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  // --- First User Interaction Detection ---
+
+  function setupFirstInteractionDetection() {
+    var events = ['touchstart', 'mousedown', 'keydown'];
+
+    function onFirstInteraction() {
+      if (firstInteractionSent) return;
+      firstInteractionSent = true;
+      sendEvent('user_interaction_start', null);
+
+      for (var i = 0; i < events.length; i++) {
+        document.removeEventListener(events[i], onFirstInteraction, true);
+      }
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], onFirstInteraction, true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+  } else {
+    setupFirstInteractionDetection();
+  }
+
+  // --- Auto Error Capture ---
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    sendEvent('error', {
+      message: event.message || 'Unknown error',
+      source: event.filename || '',
+      lineno: event.lineno || 0,
+      colno: event.colno || 0,
+      auto_captured: true
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    var reason = event.reason;
+    sendEvent('error', {
+      message: (reason instanceof Error) ? reason.message : String(reason),
+      type: 'unhandled_promise_rejection',
+      auto_captured: true
+    });
+  });
+
+  // --- Public API ---
+
+  window.playablesSDK = {
+    complete: function(score) {
+      sendEvent('game_ended', {
+        score: score,
+        completed: true
+      });
+    },
+
+    error: function(message) {
+      if (errorSent) return;
+      errorSent = true;
+      sendEvent('error', {
+        message: message || 'Unknown error',
+        auto_captured: false
+      });
+    },
+
+    sendEvent: function(eventName, payload) {
+      if (!eventName || typeof eventName !== 'string') return;
+      sendEvent(eventName, payload);
+    }
+  };
+
+  // Kick off rAF detection in case no game code calls rAF immediately
+  if (originalRAF) {
+    originalRAF.call(window, onFrame);
+  }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agência VTEX | Implementação de E-commerce Composable</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark-bg: #1c1c1c;
+    --primary: #4054b2;
+    --white: #ffffff;
+    --light-bg: #d1e7dd;
+    --text-dark: #1c1c1c;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+    scroll-behavior: smooth;
+  }
+  
+  h1, h2, h3, h4 {
+    font-family: 'Sora', sans-serif;
+  }
+  
+  .bg-dark-box { background-color: var(--dark-bg); }
+  .bg-primary { background-color: var(--primary); }
+  .bg-light-section { background-color: var(--light-bg); }
+  .text-on-dark { color: var(--white); }
+  .text-on-light { color: var(--text-dark); }
+  .text-primary { color: var(--primary); }
+  .border-primary { border-color: var(--primary); }
+  
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--white);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  
+  .btn-primary:hover {
+    background-color: #344598;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(64, 84, 178, 0.4);
+  }
+  
+  .gradient-hero {
+    background: linear-gradient(135deg, #1c1c1c 0%, #2a2a2a 50%, #1c1c1c 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .gradient-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(64, 84, 178, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .stat-number {
+    background: linear-gradient(135deg, #4054b2 0%, #5a6fd8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  .section-padding {
+    padding: 5rem 1.5rem;
+  }
+
+  .cta-section {
+    background-color: #1c1c1c;
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    .section-padding {
+      padding: 3rem 1rem;
+    }
+  }
+
+  .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+  }
+
+</style>
+</head>
+<body class="antialiased">
+
+<section class="gradient-hero section-padding text-on-dark pt-32 md:pt-40">
+  <div class="max-w-7xl mx-auto relative z-10">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="animate-fade-in">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+          <i class="fas fa-award text-primary"></i>
+          <span class="text-sm font-medium">Parceiro VTEX Certificado</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          Implementamos seu E-commerce com VTEX
+        </h1>
+        
+        <p class="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+          Somos especialistas em Composable Commerce. Transformamos sua operação digital com a plataforma líder em headless, omnichannel e marketplaces nativos para escalar vendas com eficiência.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="#contato" class="btn-primary px-8 py-4 rounded-lg font-semibold text-center inline-flex items-center justify-center gap-2">
+            <i class="fab fa-whatsapp text-2xl"></i>
+            Fale com um Especialista
+          </a>
+          <a href="#por-que-vtex" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-on-dark px-8 py-4 rounded-lg font-semibold text-center transition-all inline-flex items-center justify-center gap-2 border-white/20">
+            <i class="fas fa-arrow-down"></i>
+            Conheça a VTEX
+          </a>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/10">
+          <div>
+            <div class="text-3xl font-bold text-primary mb-1">100+</div>
+            <div class="text-sm text-gray-400">Lojas implantadas</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-primary mb-1">44%</div>
+            <div class="text-sm text-gray-400">+ Conversão média</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-primary mb-1">100</div>
+            <div class="text-sm text-gray-400">Dias para go-live</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hidden lg:block animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="bg-dark-box p-8 rounded-2xl shadow-2xl border border-white/10">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>Arquitetura Composable</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>Headless Storefront</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>OMS Nativo Unificado</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>Marketplace & Seller Center</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>Live Shopping Integrado</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-primary text-xl"></i>
+              <span>Checkout Transparente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="por-que-vtex" class="section-padding bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-primary font-semibold text-sm uppercase tracking-wider">Tecnologia de Ponta</span>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-4">Por que VTEX?</h2>
+      <p class="text-lg text-gray-600">A plataforma de commerce mais completa do mercado, construída para o futuro do varejo digital.</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-puzzle-piece text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Composable Commerce</h3>
+        <p class="text-gray-300 leading-relaxed">Arquitetura modular que permite compor a melhor solução para seu negócio, integrando qualquer tecnologia com máxima flexibilidade.</p>
+      </div>
+      
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-layer-group text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Headless Storefront</h3>
+        <p class="text-gray-300 leading-relaxed">Separe front-end e back-end para criar experiências únicas de compra, com performance superior e liberdade total de design.</p>
+      </div>
+      
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-store text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Omnichannel Nativo</h3>
+        <p class="text-gray-300 leading-relaxed">Una lojas físicas e digital com inventário unificado, ship-from-store, pick-up in store e visão 360º do cliente.</p>
+      </div>
+      
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-boxes-stacked text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">OMS Completo</h3>
+        <p class="text-gray-300 leading-relaxed">Sistema de gestão de pedidos que orquestra estoque, logística e fulfillment de múltiplos canais em tempo real.</p>
+      </div>
+      
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-shopping-bag text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Marketplace Nativo</h3>
+        <p class="text-gray-300 leading-relaxed">Transforme sua loja em marketplace ou conecte-se a milhares de sellers. Seller Center completo incluso na plataforma.</p>
+      </div>
+      
+      <div class="bg-dark-box text-on-dark p-8 rounded-2xl card-hover">
+        <div class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
+          <i class="fas fa-chart-line text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3">TCO Reduzido</h3>
+        <p class="text-gray-300 leading-relaxed">Menor custo total de propriedade com plataforma SaaS que elimina gastos com infraestrutura, segurança e atualizações.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="servicos" class="section-padding bg-light-section">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-primary font-semibold text-sm uppercase tracking-wider">Expertise Completa</span>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-4 text-on-light">Nossos Serviços</h2>
+      <p class="text-lg text-gray-700">Do zero ao go-live e além. Implementamos, migramos e otimizamos sua operação na VTEX.</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white p-8 rounded-2xl shadow-sm card-hover border border-gray-100">
+        <div class="w-12 h-12 bg-light-section rounded-lg flex items-center justify-center mb-5">
+          <i class="fas fa-rocket text-primary text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-on-light">Implantação VTEX IO</h3>
+        <p class="text-gray-600 leading-relaxed">Desenvolvimento completo da sua loja na plataforma VTEX IO, com storefront customizado, integrações e go-live assistido.</p>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm card-hover border border-gray-100">
+        <div class="w-12 h-12 bg-light-section rounded-lg flex items-center justify-center mb-5">
+          <i class="fas fa-exchange-alt text-primary text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-on-light">Migração de Plataforma</h3>
+        <p class="text-gray-600 leading-relaxed">Migração segura de Magento, WooCommerce, Shopify e outras plataformas, preservando SEO, dados e histórico.</p>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm card-hover border border-gray-100">
+        <div class="w-12 h-12 bg-light-section rounded-lg flex items-center justify-center mb-5">
+          <i class="fas fa-bullseye text-primary text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-on-light">Otimização de Conversão</h3>
+        <p class="text-gray-600 leading-relaxed">CRO, testes A/B, otimização de checkout e performance para aumentar sua taxa de conversão e ticket médio.</p>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm card-hover border border-gray-100">
+        <div class="w-12 h-12 bg-light-section rounded-lg flex items-center justify-center mb-5">
+          <i class="fas fa-plug text-primary text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-on-light">Integrações ERP/CRM</h3>
+        <p class="text-gray-600 leading-relaxed">Conectamos VTEX ao seu SAP, Oracle, Totvs, Salesforce ou qualquer sistema via APIs e middlewares.</p>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm card-hover border border-gray-100 md:col-span-2 lg:col-span-1">
+        <div class="w-12 h-12 bg-light-section rounded-lg flex items-center justify-center mb-5">
+          <i class="fas fa-video text-primary text-xl"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-on-light">Live Shopping e Pick and Pack</h3>
+        <p class="text-gray-600 leading-relaxed">Implementação de Live Commerce, VTEX Pick and Pack para otimizar separação em loja e acelerar fulfillment omnichannel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cases" class="section-padding bg-dark-box text-on-dark">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-primary font-semibold text-sm uppercase tracking-wider">Resultados Comprovados</span>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-4">Cases e Resultados</h2>
+      <p class="text-lg text-gray-300">Números que comprovam a eficiência da VTEX e da nossa implementação.</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+      <div class="text-center">
+        <div class="text-5xl md:text-6xl font-bold stat-number mb-2">44%</div>
+        <p class="text-gray-300 font-medium">Aumento médio de conversão pós-migração</p>
+      </div>
+      <div class="text-center">
+        <div class="text-5xl md:text-6xl font-bold stat-number mb-2">100</div>
+        <p class="text-gray-300 font-medium">Dias para go-live em projetos acelerados</p>
+      </div>
+      <div class="text-center">
+        <div class="text-5xl md:text-6xl font-bold stat-number mb-2">3x</div>
+        <p class="text-gray-300 font-medium">Mais rápido que plataformas legadas</p>
+      </div>
+      <div class="text-center">
+        <div class="text-5xl md:text-6xl font-bold stat-number mb-2">99.9%</div>
+        <p class="text-gray-300 font-medium">Uptime garantido pela VTEX</p>
+      </div>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="fas fa-trophy text-primary text-2xl"></i>
+          <h4 class="font-bold text-lg">Gartner</h4>
+        </div>
+        <p class="text-gray-300">VTEX reconhecida como Leader no Quadrante Mágico de Digital Commerce pelo terceiro ano consecutivo.</p>
+      </div>
+      
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="fas fa-chart-bar text-primary text-2xl"></i>
+          <h4 class="font-bold text-lg">IDC MarketScape</h4>
+        </div>
+        <p class="text-gray-300">Posicionada como Major Player em plataformas de B2C Digital Commerce na América Latina e mundial.</p>
+      </div>
+      
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="fas fa-globe text-primary text-2xl"></i>
+          <h4 class="font-bold text-lg">38 Países</h4>
+        </div>
+        <p class="text-gray-300">VTEX atende mais de 3.400 clientes em 38 países, processando bilhões em GMV anualmente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tecnologias" class="section-padding bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-primary font-semibold text-sm uppercase tracking-wider">Stack Técnico</span>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-4">Tecnologias que Dominamos</h2>
+      <p class="text-lg text-gray-600">Expertise profunda em todo o ecossistema VTEX para entregar projetos de alta complexidade.</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-light-section p-6 rounded-xl text-center card-hover">
+        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-code text-white text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-lg text-on-light mb-2">VTEX IO</h3>
+        <p class="text-sm text-gray-700">Desenvolvimento nativo na plataforma com Store Framework, React e GraphQL.</p>
+      </div>
+      
+      <div class="bg-light-section p-6 rounded-xl text-center card-hover">
+        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-window-restore text-white text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-lg text-on-light mb-2">Headless Storefront</h3>
+        <p class="text-sm text-gray-700">Next.js, FastStore, React para front-ends desacoplados de alta performance.</p>
+      </div>
+      
+      <div class="bg-light-section p-6 rounded-xl text-center card-hover">
+        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-dolly text-white text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-lg text-on-light mb-2">OMS VTEX</h3>
+        <p class="text-sm text-gray-700">Configuração avançada de logística, estoque, sellers e políticas comerciais.</p>
+      </div>
+      
+      <div class="bg-light-section p-6 rounded-xl text-center card-hover">
+        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-puzzle-piece text-white text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-lg text-on-light mb-2">Hub de Extensões</h3>
+        <p class="text-sm text-gray-700">Apps nativos, integrações customizadas e desenvolvimento de conectores.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-padding bg-light-section">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-primary font-semibold text-sm uppercase tracking-wider">Depoimentos</span>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-4 text-on-light">O que nossos clientes dizem</h2>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white p-8 rounded-2xl shadow-sm">
+        <div class="flex gap-1 mb-4">
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"Migração perfeita em 90 dias. Saímos de uma plataforma lenta para VTEX IO e aumentamos 52% a conversão já no primeiro mês."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">MC</div>
+          <div>
+            <div class="font-bold text-on-light">Marina Costa</div>
+            <div class="text-sm text-gray-600">Head de E-commerce, Fashion Brand</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm">
+        <div class="flex gap-1 mb-4">
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"A implementação do OMS unificado transformou nossa operação omnichannel. Reduzimos 40% do tempo de fulfillment com ship-from-store."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">RS</div>
+          <div>
+            <div class="font-bold text-on-light">Ricardo Silva</div>
+            <div class="text-sm text-gray-600">Diretor de Operações, Varejo</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm">
+        <div class="flex gap-1 mb-4">
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+          <i class="fas fa-star text-yellow-400"></i>
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"Time técnico excepcional. Implementaram nosso marketplace com 200 sellers em tempo recorde. Suporte pós-go-live impecável."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">AL</div>
+          <div>
+            <div class="font-bold text-on-light">Ana Lima</div>
+            <div class="text-sm text-gray-600">CEO, Marketplace B2B</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contato" class="section">
+  <div class="container mt-16 mb-16">
+    <div class="cta-section">
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+                Pronto para escalar com VTEX?
+            </h2>
+            <p class="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Fale com um especialista certificado e receba uma análise gratuita da sua operação. Vamos desenhar o projeto ideal para seu negócio.
+            </p>
+            
+            <a href="https://wa.me/5500000000000?text=Olá.+Quero+implementar+VTEX+na+minha+empresa" target="_blank" class="btn-primary whatsapp-pulse px-10 py-5 rounded-2xl font-bold text-xl inline-flex items-center gap-4 justify-center shadow-2xl">
+                <i class="fab fa-whatsapp text-3xl"></i>
+                Falar no WhatsApp
+            </a>
+            
+            <div class="flex flex-wrap justify-center gap-8 mt-12 text-white/90">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Resposta em até 1h</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Diagnóstico Gratuito</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Sem compromisso</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+  </div>
+</section>
+
+<script>
+  // Mobile Menu Toggle - Adicionado IF para evitar erro se os IDs não existirem
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  if(mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      const icon = mobileMenuBtn.querySelector('i');
+      if(icon) {
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+      }
+    });
+    
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+        const icon = mobileMenuBtn.querySelector('i');
+        if(icon) {
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        }
+      });
+    });
+  }
+  
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        const headerOffset = 80;
+        const elementPosition = target.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+  
+  // Form submit handler - Adicionado IF para evitar erro se o formulário não existir
+  const contactForm = document.getElementById('contact-form');
+  if(contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Obrigado pelo contato! Um especialista entrará em contato em breve.');
+      this.reset();
+    });
+  }
+  
+  // Intersection Observer for fade-in animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  }, observerOptions);
+  
+  document.querySelectorAll('.card-hover').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
