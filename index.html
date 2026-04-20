@@ -2,12 +2,9 @@
 <html lang="pt-BR">
 <head>
 <script>// Playables SDK v1.0.0
-// Game lifecycle bridge: rAF-based game-ready detection + event communication
+
 (function() {
   'use strict';
-
-  // Idempotency: skip if already initialized (e.g., server-side injection
-  // followed by client-side inject-javascript via the Bloks webview component).
   if (window.playablesSDK) return;
 
   var HANDLER_NAME = 'playablesGameEventHandler';
