@@ -1,0 +1,1095 @@
+<html lang="pt-BR"><head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+'use strict';
+
+// Idempotency: skip if already initialized (e.g., server-side injection
+// followed by client-side inject-javascript via the Bloks webview component).
+if (window.playablesSDK) return;
+
+var HANDLER_NAME = 'playablesGameEventHandler';
+var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+var RAF_FRAME_THRESHOLD = 3;
+
+var gameReadySent = false;
+var firstInteractionSent = false;
+var errorSent = false;
+var frameCount = 0;
+var originalRAF = window.requestAnimationFrame;
+
+// --- Transport Layer ---
+
+function hasIOSBridge() {
+return !!(window.webkit &&
+window.webkit.messageHandlers &&
+window.webkit.messageHandlers[HANDLER_NAME]);
+}
+
+function hasAndroidBridge() {
+return !!(window[ANDROID_BRIDGE_NAME] &&
+typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+}
+
+function isInIframe() {
+return !!(window.parent && window.parent !== window);
+}
+
+function sendEvent(eventName, payload) {
+var message = {
+type: eventName,
+payload: payload || {},
+timestamp: Date.now()
+};
+
+if (hasIOSBridge()) {
+try {
+window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+} catch (e) { /* ignore */ }
+return;
+}
+
+if (hasAndroidBridge()) {
+try {
+var p = payload || {};
+p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+p.timestamp = message.timestamp;
+window[ANDROID_BRIDGE_NAME].postEvent(
+eventName,
+JSON.stringify(p)
+);
+} catch (e) { /* ignore */ }
+return;
+}
+
+if (isInIframe()) {
+try {
+window.parent.postMessage(message, '*');
+} catch (e) { /* ignore */ }
+return;
+}
+}
+
+// --- rAF Game-Ready Detection ---
+
+function onFrame() {
+if (gameReadySent) return;
+
+frameCount++;
+if (frameCount >= RAF_FRAME_THRESHOLD) {
+gameReadySent = true;
+sendEvent('game_ready', {
+frame_count: frameCount,
+detected_at: Date.now()
+});
+return;
+}
+
+originalRAF.call(window, onFrame);
+}
+
+if (originalRAF) {
+window.requestAnimationFrame = function(callback) {
+if (!gameReadySent) {
+return originalRAF.call(window, function(timestamp) {
+frameCount++;
+if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+gameReadySent = true;
+sendEvent('game_ready', {
+frame_count: frameCount,
+detected_at: Date.now()
+});
+}
+callback(timestamp);
+});
+}
+return originalRAF.call(window, callback);
+};
+}
+
+// --- First User Interaction Detection ---
+
+function setupFirstInteractionDetection() {
+var events = ['touchstart', 'mousedown', 'keydown'];
+
+function onFirstInteraction() {
+if (firstInteractionSent) return;
+firstInteractionSent = true;
+sendEvent('user_interaction_start', null);
+
+for (var i = 0; i < events.length; i++) {
+document.removeEventListener(events[i], onFirstInteraction, true);
+}
+}
+
+for (var i = 0; i < events.length; i++) {
+document.addEventListener(events[i], onFirstInteraction, true);
+}
+}
+
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+} else {
+setupFirstInteractionDetection();
+}
+
+// --- Auto Error Capture ---
+
+window.addEventListener('error', function(event) {
+if (errorSent) return;
+errorSent = true;
+sendEvent('error', {
+message: event.message || 'Unknown error',
+source: event.filename || '',
+lineno: event.lineno || 0,
+colno: event.colno || 0,
+auto_captured: true
+});
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+if (errorSent) return;
+errorSent = true;
+var reason = event.reason;
+sendEvent('error', {
+message: (reason instanceof Error) ? reason.message : String(reason),
+type: 'unhandled_promise_rejection',
+auto_captured: true
+});
+});
+
+// --- Public API ---
+
+window.playablesSDK = {
+complete: function(score) {
+sendEvent('game_ended', {
+score: score,
+completed: true
+});
+},
+
+error: function(message) {
+if (errorSent) return;
+errorSent = true;
+sendEvent('error', {
+message: message || 'Unknown error',
+auto_captured: false
+});
+},
+
+sendEvent: function(eventName, payload) {
+if (!eventName || typeof eventName !== 'string') return;
+sendEvent(eventName, payload);
+}
+};
+
+// Kick off rAF detection in case no game code calls rAF immediately
+if (originalRAF) {
+originalRAF.call(window, onFrame);
+}
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrayCommerce - Implementação de Loja Virtual | Tray Oficial</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Playables SDK -->
+<script>
+window.playablesSDK = {
+track: function(event, data) { console.log('Track:', event, data); },
+init: function() { console.log('Playables SDK initialized'); }
+};
+</script>
+<style>
+:root {
+--dark-bg: #1c1c1c;
+--primary: #4054b2;
+--white: #ffffff;
+--light-bg: #d1e7dd;
+--dark-gray: #2c2c2c;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background-color: var(--white);
+color: var(--dark-bg);
+overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+font-family: 'Sora', sans-serif;
+}
+
+.gradient-hero {
+background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 50%, #e8edff 100%);
+position: relative;
+overflow: hidden;
+}
+
+.gradient-hero::before {
+content: '';
+position: absolute;
+top: -50%;
+right: 0;
+width: 100%;
+max-width: 800px;
+height: 150%;
+background: radial-gradient(circle, rgba(64, 84, 178, 0.08) 0%, transparent 70%);
+animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+0%, 100% { transform: scale(1) translateY(0); opacity: 0.5; }
+50% { transform: scale(1.1) translateY(-20px); opacity: 0.8; }
+}
+
+.btn-primary {
+background: var(--primary);
+color: var(--white);
+padding: 14px 32px;
+border-radius: 12px;
+font-weight: 600;
+transition: all 0.3s ease;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+box-shadow: 0 4px 14px rgba(64, 84, 178, 0.3);
+border: none;
+cursor: pointer;
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(64, 84, 178, 0.45);
+background: #3345a0;
+}
+
+.btn-secondary {
+background: var(--white);
+color: var(--primary);
+padding: 14px 32px;
+border-radius: 12px;
+font-weight: 600;
+transition: all 0.3s ease;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+border: 2px solid var(--primary);
+cursor: pointer;
+}
+
+.btn-secondary:hover {
+background: var(--primary);
+color: var(--white);
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(64, 84, 178, 0.25);
+}
+
+.card-dark {
+background: var(--dark-bg);
+color: var(--white);
+border-radius: 20px;
+padding: 32px;
+transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+border: 1px solid rgba(255, 255, 255, 0.05);
+height: 100%;
+overflow-wrap: break-word;
+word-wrap: break-word;
+}
+
+.card-dark:hover {
+transform: translateY(-8px);
+box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+border-color: rgba(64, 84, 178, 0.4);
+}
+
+.card-light {
+background: var(--white);
+border-radius: 20px;
+padding: 32px;
+transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+border: 1px solid rgba(0, 0, 0, 0.06);
+height: 100%;
+overflow-wrap: break-word;
+word-wrap: break-word;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-light:hover {
+transform: translateY(-8px);
+box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+border-color: rgba(64, 84, 178, 0.2);
+}
+
+.icon-box {
+width: 56px;
+height: 56px;
+background: linear-gradient(135deg, var(--primary), #5a6fd0);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+box-shadow: 0 4px 12px rgba(64, 84, 178, 0.3);
+}
+
+.icon-box-light {
+width: 56px;
+height: 56px;
+background: var(--light-bg);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+color: var(--primary);
+}
+
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(64, 84, 178, 0.1);
+color: var(--primary);
+padding: 8px 16px;
+border-radius: 50px;
+font-size: 14px;
+font-weight: 600;
+border: 1px solid rgba(64, 84, 178, 0.2);
+}
+
+.stat-number {
+font-family: 'Sora', sans-serif;
+font-size: 48px;
+font-weight: 700;
+background: linear-gradient(135deg, var(--primary), #5a6fd0);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+line-height: 1.2;
+}
+
+.mockup-browser {
+background: var(--dark-gray);
+border-radius: 16px;
+padding: 12px;
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.mockup-header {
+display: flex;
+gap: 6px;
+margin-bottom: 12px;
+padding: 8px;
+}
+
+.mockup-dot {
+width: 12px;
+height: 12px;
+border-radius: 50%;
+}
+
+.mockup-content {
+background: var(--white);
+border-radius: 8px;
+padding: 24px;
+min-height: 300px;
+}
+
+.cta-section {
+background: var(--light-bg);
+position: relative;
+overflow: hidden;
+}
+
+.cta-section::before {
+content: '';
+position: absolute;
+top: -100px;
+right: -100px;
+width: 400px;
+height: 400px;
+background: radial-gradient(circle, rgba(64, 84, 178, 0.15) 0%, transparent 70%);
+border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+.stat-number {
+font-size: 36px;
+}
+
+.card-dark, .card-light {
+padding: 24px;
+}
+}
+
+.fade-in {
+animation: fadeIn 0.8s ease-out forwards;
+opacity: 0;
+}
+
+@keyframes fadeIn {
+from {
+opacity: 0;
+transform: translateY(20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+</style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.z-10{z-index:10}.mx-auto{margin-left:auto;margin-right:auto}.mb-10{margin-bottom:2.5rem}.mb-12{margin-bottom:3rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:0.25rem}.mt-10{margin-top:2.5rem}.mt-2{margin-top:0.5rem}.flex{display:flex}.grid{display:grid}.h-10{height:2.5rem}.h-12{height:3rem}.w-10{width:2.5rem}.w-12{width:3rem}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-5xl{max-width:64rem}.max-w-7xl{max-width:80rem}.flex-shrink-0{flex-shrink:0}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.gap-1{gap:0.25rem}.gap-12{gap:3rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-green-200{--tw-border-opacity:1;border-color:rgb(187 247 208 / var(--tw-border-opacity, 1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-20{padding-top:5rem;padding-bottom:5rem}.pb-4{padding-bottom:1rem}.pt-4{padding-top:1rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:py-28{padding-top:7rem;padding-bottom:7rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}.lg\:text-5xl{font-size:3rem;line-height:1}.lg\:text-6xl{font-size:3.75rem;line-height:1}}</style></head>
+<body>
+
+<!-- Hero Section -->
+<section class="gradient-hero py-20 md:py-28 relative">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+<div class="grid lg:grid-cols-2 gap-12 items-center">
+<div class="fade-in" style="animation-play-state: paused;">
+<div class="badge mb-6">
+<i class="fa-solid fa-rocket"></i>
+Plataforma SaaS do grupo LWSA
+</div>
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style="color: var(--dark-bg);">
+Implementamos sua <span style="color: var(--primary);">Loja Virtual</span> com TrayCommerce
+</h1>
+<p class="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed">
+A Tray é a plataforma mais completa do Brasil, com mais de +600 recursos nativos, 23 anos de mercado e tudo que você precisa para vender mais sem pagar por apps extras.
+</p>
+<div class="flex flex-wrap gap-4 mb-10">
+<button class="btn-primary" onclick="window.open('https://wa.me/5511999999999?text=Olá! Quero implementar minha loja na TrayCommerce', '_blank')">
+<i class="fa-brands fa-whatsapp"></i>
+Falar no WhatsApp
+</button>
+<button class="btn-secondary" onclick="document.getElementById('porque-tray').scrollIntoView({behavior: 'smooth'})">
+Conhecer a Tray
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
+<div>
+<div class="stat-number">100+</div>
+<p class="text-sm text-gray-600 mt-1">Lojas Implantadas</p>
+</div>
+<div>
+<div class="stat-number">44%</div>
+<p class="text-sm text-gray-600 mt-1">+ Conversão Média</p>
+</div>
+<div>
+<div class="stat-number">15 dias</div>
+<p class="text-sm text-gray-600 mt-1">Pra Go-Live</p>
+</div>
+</div>
+</div>
+
+<div class="fade-in delay-2" style="animation-play-state: paused;">
+<div class="mockup-browser">
+<div class="mockup-header">
+<div class="mockup-dot" style="background: #ff5f57;"></div>
+<div class="mockup-dot" style="background: #febc2e;"></div>
+<div class="mockup-dot" style="background: #28c840;"></div>
+</div>
+<div class="mockup-content">
+<div class="flex items-center gap-3 mb-4 pb-4 border-b">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--primary);">
+<i class="fa-solid fa-store text-white"></i>
+</div>
+<div>
+<div class="font-bold" style="font-family: 'Sora', sans-serif;">Sua Loja TrayCommerce</div>
+<div class="text-xs text-gray-500">loja.tray.com.br</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Loja Profissional</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Checkout Transparente</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Integração Marketplaces</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Tray Envios</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Tray Pagamentos</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+<i class="fa-solid fa-circle-check text-green-600"></i>
+<span class="text-sm font-medium">Dropshipping AliExpress</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Por que Tray Section -->
+<section id="porque-tray" class="py-20 md:py-28" style="background: var(--dark-bg);">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in" style="animation-play-state: paused;">
+<div class="badge mb-4" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: var(--white);">
+<i class="fa-solid fa-star"></i>
+Por que Tray?
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+Tudo que sua loja precisa em um só lugar
+</h2>
+<p class="text-lg text-gray-300 max-w-3xl mx-auto">
+Chega de pagar mensalidades caras por apps. Na Tray você tem +600 recursos nativos para vender mais desde o primeiro dia.
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="card-dark fade-in delay-1" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-cloud text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">Loja Completa SaaS</h3>
+<p class="text-gray-300 leading-relaxed">
+Hospedagem, manutenção e atualizações inclusas. Você foca em vender enquanto nós cuidamos da tecnologia.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-2" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-layer-group text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">600+ Recursos Nativos</h3>
+<p class="text-gray-300 leading-relaxed">
+Não pague por apps extras. Banners, FAQs, blog, filtros inteligentes e muito mais já inclusos na plataforma.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-3" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-share-nodes text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">Integração Multicanal</h3>
+<p class="text-gray-300 leading-relaxed">
+Venda em marketplaces, redes sociais, sacolinha do Instagram, WhatsApp e gerencie tudo em um só painel.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-4" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-credit-card text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">Checkout Transparente</h3>
+<p class="text-gray-300 leading-relaxed">
+Aprova 43% mais pedidos que o mercado. Cliente finaliza a compra sem sair da sua loja, aumentando a conversão.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-5" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-truck-fast text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">Tray Envios</h3>
+<p class="text-gray-300 leading-relaxed">
+Frete até 60% mais barato com Correios e transportadoras. Cálculo automático e rastreamento integrado.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-6" style="animation-play-state: paused;">
+<div class="icon-box mb-6">
+<i class="fa-solid fa-brain text-white"></i>
+</div>
+<h3 class="text-xl font-bold mb-3">IA Nativa</h3>
+<p class="text-gray-300 leading-relaxed">
+Descrições de produtos geradas por IA, automação de atendimento e insights para vender mais no automático.
+</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Nossos Serviços Section -->
+<section class="py-20 md:py-28" style="background: var(--light-bg);">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in" style="animation-play-state: paused;">
+<div class="badge mb-4">
+<i class="fa-solid fa-screwdriver-wrench"></i>
+Nossos Serviços
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4" style="color: var(--dark-bg);">
+Implementação completa de ponta a ponta
+</h2>
+<p class="text-lg text-gray-700 max-w-3xl mx-auto">
+Cuidamos de toda a parte técnica para você focar no que importa: vender e crescer.
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="card-light fade-in delay-1" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-rocket"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Implantação Tray</h3>
+<p class="text-gray-600 leading-relaxed">
+Configuração completa da sua loja, layout profissional, cadastro de produtos e checkout transparente pronto para vender.
+</p>
+</div>
+
+<div class="card-light fade-in delay-2" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-right-left"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Migração de Plataforma</h3>
+<p class="text-gray-600 leading-relaxed">
+Migramos sua loja de WooCommerce, Shopify, Loja Integrada ou qualquer plataforma para Tray sem perder SEO ou dados.
+</p>
+</div>
+
+<div class="card-light fade-in delay-3" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-chart-line"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Otimização de Conversão</h3>
+<p class="text-gray-600 leading-relaxed">
+Análise de funil, otimização de checkout, testes A/B e melhorias contínuas para aumentar sua taxa de conversão.
+</p>
+</div>
+
+<div class="card-light fade-in delay-4" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-plug"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Integrações ERP/CRM</h3>
+<p class="text-gray-600 leading-relaxed">
+Conectamos sua loja com Bling, Tiny, OMIE, TOTVS e outros ERPs. Sincronização automática de estoque e pedidos.
+</p>
+</div>
+
+<div class="card-light fade-in delay-5" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-box"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Dropshipping AliExpress</h3>
+<p class="text-gray-600 leading-relaxed">
+Integramos sua loja com AlienExpress via Dropi. Importe produtos, gerencie pedidos e automatize o fulfillment.
+</p>
+</div>
+
+<div class="card-light fade-in delay-6" style="animation-play-state: paused;">
+<div class="icon-box-light mb-6">
+<i class="fa-solid fa-graduation-cap"></i>
+</div>
+<h3 class="text-xl font-bold mb-3" style="color: var(--dark-bg);">Treinamento e Suporte 30 dias</h3>
+<p class="text-gray-600 leading-relaxed">
+Treinamento completo da equipe, materiais em vídeo e 30 dias de suporte pós go-live para garantir seu sucesso.
+</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Cases e Resultados Section -->
+<section class="py-20 md:py-28" style="background: var(--dark-bg);">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in" style="animation-play-state: paused;">
+<div class="badge mb-4" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: var(--white);">
+<i class="fa-solid fa-trophy"></i>
+Cases e Resultados
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+Resultados comprovados em números
+</h2>
+<p class="text-lg text-gray-300 max-w-3xl mx-auto">
+Confiança de milhares de lojistas e resultados que falam por si.
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<div class="card-dark text-center fade-in delay-1" style="animation-play-state: paused;">
+<div class="text-5xl font-bold mb-2" style="color: var(--primary); font-family: 'Sora', sans-serif;">43%</div>
+<p class="text-gray-300">Aprovação Checkout</p>
+<p class="text-xs text-gray-500 mt-2">vs. outras plataformas</p>
+</div>
+
+<div class="card-dark text-center fade-in delay-2" style="animation-play-state: paused;">
+<div class="text-5xl font-bold mb-2" style="color: var(--primary); font-family: 'Sora', sans-serif;">60%</div>
+<p class="text-gray-300">Frete mais barato</p>
+<p class="text-xs text-gray-500 mt-2">com Tray Envios</p>
+</div>
+
+<div class="card-dark text-center fade-in delay-3" style="animation-play-state: paused;">
+<div class="text-5xl font-bold mb-2" style="color: var(--primary); font-family: 'Sora', sans-serif;">15 dias</div>
+<p class="text-gray-300">Go-Live Médio</p>
+<p class="text-xs text-gray-500 mt-2">implantação rápida</p>
+</div>
+
+<div class="card-dark text-center fade-in delay-4" style="animation-play-state: paused;">
+<div class="text-5xl font-bold mb-2" style="color: var(--primary); font-family: 'Sora', sans-serif;">99.9%</div>
+<p class="text-gray-300">Uptime Garantido</p>
+<p class="text-xs text-gray-500 mt-2">infraestrutura cloud</p>
+</div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<div class="card-dark fade-in delay-1" style="animation-play-state: paused;">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: var(--primary);">
+<i class="fa-solid fa-building text-white text-xl"></i>
+</div>
+<div>
+<div class="font-bold">LWSA/Locaweb Company</div>
+<div class="text-xs text-gray-400">Grupo líder em tecnologia</div>
+</div>
+</div>
+<p class="text-gray-300 text-sm leading-relaxed">
+Parte do ecossistema LWSA, com infraestrutura robusta e suporte de uma das maiores empresas de tecnologia do Brasil.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-2" style="animation-play-state: paused;">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: var(--primary);">
+<i class="fa-solid fa-palette text-white text-xl"></i>
+</div>
+<div>
+<div class="font-bold">+500 Temas Profissionais</div>
+<div class="text-xs text-gray-400">Tray Storefront</div>
+</div>
+<p class="text-gray-300 text-sm leading-relaxed">
+Mais de 500 layouts editáveis para todos os segmentos. Personalize sem código ou tenha código aberto total.
+</p>
+</div>
+
+<div class="card-dark fade-in delay-3" style="animation-play-state: paused;">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: var(--primary);">
+<i class="fa-solid fa-calendar-check text-white text-xl"></i>
+</div>
+<div>
+<div class="font-bold">23 Anos de Mercado</div>
+<div class="text-xs text-gray-400">Pioneira em e-commerce</div>
+</div>
+</div>
+<p class="text-gray-300 text-sm leading-relaxed">
+Desde 2002 evoluindo o e-commerce brasileiro. Milhares de lojistas confiam na Tray para vender online.
+</p>
+</div>
+</div>
+</div>
+</div></section>
+
+<!-- Tecnologias Section -->
+<section class="py-20 md:py-28" style="background: var(--light-bg);">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in" style="animation-play-state: paused;">
+<div class="badge mb-4">
+<i class="fa-solid fa-microchip"></i>
+Tecnologias
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4" style="color: var(--dark-bg);">
+Stack completo para escalar
+</h2>
+<p class="text-lg text-gray-700 max-w-3xl mx-auto">
+Ecossistema Tray com tudo que você precisa para vender mais, sem complexidade.
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8">
+<div class="card-light fade-in delay-1" style="animation-play-state: paused;">
+<div class="flex items-start gap-4 mb-6">
+<div class="icon-box-light flex-shrink-0">
+<i class="fa-solid fa-store"></i>
+</div>
+<div>
+<h3 class="text-2xl font-bold mb-2" style="color: var(--dark-bg);">Tray Storefront</h3>
+<p class="text-gray-600">Loja visual profissional com +50 layouts editáveis e personalização completa via código ou no-code.</p>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Editor visual drag &amp; drop</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>500+ temas profissionais</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Mobile first e responsivo</span>
+</li>
+</ul>
+</div>
+
+<div class="card-light fade-in delay-2" style="animation-play-state: paused;">
+<div class="flex items-start gap-4 mb-6">
+<div class="icon-box-light flex-shrink-0">
+<i class="fa-solid fa-code"></i>
+</div>
+<div>
+<h3 class="text-2xl font-bold mb-2" style="color: var(--dark-bg);">Código Aberto</h3>
+<p class="text-gray-600">Acesso total ao HTML/CSS/JS. Personalize cada detalhe da sua loja sem limitações.</p>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Customização ilimitada</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>API REST completa</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Webhooks e integrações</span>
+</li>
+</ul>
+</div>
+
+<div class="card-light fade-in delay-3" style="animation-play-state: paused;">
+<div class="flex items-start gap-4 mb-6">
+<div class="icon-box-light flex-shrink-0">
+<i class="fa-solid fa-plug-circle-bolt"></i>
+</div>
+<div>
+<h3 class="text-2xl font-bold mb-2" style="color: var(--dark-bg);">Integrações</h3>
+<p class="text-gray-600">5.000+ apps e integrações nativas. Conecte com tudo que você já usa sem complicação.</p>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Marketplaces: ML, Amazon, Shopee</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>ERPs: Bling, Tiny, OMIE, TOTVS</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Marketing: RD, Mailchimp, Google</span>
+</li>
+</ul>
+</div>
+
+<div class="card-light fade-in delay-4" style="animation-play-state: paused;">
+<div class="flex items-start gap-4 mb-6">
+<div class="icon-box-light flex-shrink-0">
+<i class="fa-solid fa-money-check-dollar"></i>
+</div>
+<div>
+<h3 class="text-2xl font-bold mb-2" style="color: var(--dark-bg);">Tray Pagamentos</h3>
+<p class="text-gray-600">Checkout transparente com taxa zero no plano Pro. Pix, Boleto e Cartão em até 12x.</p>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Checkout transparente nativo</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Antifraude integrado</span>
+</li>
+<li class="flex items-center gap-3 text-gray-700">
+<i class="fa-solid fa-check-circle" style="color: var(--primary);"></i>
+<span>Recuperação de carrinho</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></div></div></div></section>
+
+<!-- Depoimentos Section -->
+<section class="py-20 md:py-28 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16 fade-in" style="animation-play-state: paused;">
+<div class="badge mb-4">
+<i class="fa-solid fa-comments"></i>
+Depoimentos
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4" style="color: var(--dark-bg);">
+Quem usa Tray, recomenda
+</h2>
+<p class="text-lg text-gray-700 max-w-3xl mx-auto">
+Veja o que lojistas de verdade falam sobre a plataforma TrayCommerce.
+</p>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<div class="card-light fade-in delay-1" style="animation-play-state: paused;">
+<div class="flex items-center gap-1 mb-4" style="color: #fbbf24;">
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+</div>
+<p class="text-gray-700 mb-6 leading-relaxed">
+"Migramos do WooCommerce para Tray e a diferença é absurda. Checkout transparente aumentou nossa conversão em 38% e o suporte é nota 10."
+</p>
+<div class="flex items-center gap-3 pt-4 border-t">
+<div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white" style="background: var(--primary);">
+MC
+</div>
+<div>
+<div class="font-bold" style="color: var(--dark-bg);">Marcos Costa</div>
+<div class="text-sm text-gray-500">Moda Fashion Store</div>
+</div>
+</div>
+</div>
+
+<div class="card-light fade-in delay-2" style="animation-play-state: paused;">
+<div class="flex items-center gap-1 mb-4" style="color: #fbbf24;">
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+</div>
+<p class="text-gray-700 mb-6 leading-relaxed">
+"O Tray Envios reduziu nosso custo de frete em 55%. Fora que não pago mais apps extras. Tudo que preciso já vem nativo na plataforma."
+</p>
+<div class="flex items-center gap-3 pt-4 border-t">
+<div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white" style="background: var(--primary);">
+AS
+</div>
+<div>
+<div class="font-bold" style="color: var(--dark-bg);">Ana Silva</div>
+<div class="text-sm text-gray-500">Casa &amp; Decoração</div>
+</div>
+</div>
+</div>
+
+<div class="card-light fade-in delay-3" style="animation-play-state: paused;">
+<div class="flex items-center gap-1 mb-4" style="color: #fbbf24;">
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+<i class="fa-solid fa-star"></i>
+</div>
+<p class="text-gray-700 mb-6 leading-relaxed">
+"Comecei com dropshipping no AliExpress via Tray e hoje tenho loja própria. A integração com Dropi é perfeita e a IA me ajuda muito."
+</p>
+<div class="flex items-center gap-3 pt-4 border-t">
+<div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white" style="background: var(--primary);">
+RR
+</div>
+<div>
+<div class="font-bold" style="color: var(--dark-bg);">Rafael Rodrigues</div>
+<div class="text-sm text-gray-500">Tech Imports</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="cta-section py-20 md:py-28">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+<div class="fade-in" style="animation-play-state: paused;">
+<div class="badge mb-6">
+<i class="fa-solid fa-rocket"></i>
+Comece hoje mesmo
+</div>
+<h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6" style="color: var(--dark-bg);">
+Pronto para escalar com Tray?
+</h2>
+<p class="text-lg md:text-xl text-gray-700 mb-4 max-w-3xl mx-auto leading-relaxed">
+Análise gratuita da sua operação, resposta em até 1h e diagnóstico completo sem compromisso.
+</p>
+<p class="text-base text-gray-600 mb-10 max-w-2xl mx-auto">
+Implementamos sua loja em 15 dias ou menos. Checkout transparente, integrações prontas e suporte dedicado.
+</p>
+<div class="flex flex-wrap gap-4 justify-center">
+<button class="btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="window.open('https://wa.me/5511999999999?text=Olá! Quero uma análise gratuita da TrayCommerce', '_blank')">
+<i class="fa-brands fa-whatsapp text-xl"></i>
+Falar no WhatsApp
+</button>
+</div>
+<div class="flex flex-wrap gap-6 justify-center mt-10 text-sm text-gray-600">
+<div class="flex items-center gap-2">
+<i class="fa-solid fa-circle-check" style="color: var(--primary);"></i>
+<span>Análise gratuita</span>
+</div>
+<div class="flex items-center gap-2">
+<i class="fa-solid fa-circle-check" style="color: var(--primary);"></i>
+<span>Sem compromisso</span>
+</div>
+<div class="flex items-center gap-2">
+<i class="fa-solid fa-circle-check" style="color: var(--primary);"></i>
+<span>Resposta em 1h</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+// Initialize Playables SDK
+document.addEventListener('DOMContentLoaded', function() {
+if (window.playablesSDK && typeof window.playablesSDK.init === 'function') {
+window.playablesSDK.init();
+}
+
+// Track scroll depth
+let scrollTracked = {25: false, 50: false, 75: false, 100: false};
+window.addEventListener('scroll', function() {
+const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+Object.keys(scrollTracked).forEach(percent => {
+if (scrollPercent >= percent && !scrollTracked[percent]) {
+scrollTracked[percent] = true;
+if (window.playablesSDK && typeof window.playablesSDK.track === 'function') {
+window.playablesSDK.track('scroll_depth', {percent: percent});
+}
+}
+});
+}, {passive: true});
+});
+
+// Smooth fade-in on scroll
+const observerOptions = {
+threshold: 0.1,
+rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.style.animationPlayState = 'running';
+observer.unobserve(entry.target);
+}
+});
+}, observerOptions);
+
+document.querySelectorAll('.fade-in').forEach(el => {
+el.style.animationPlayState = 'paused';
+observer.observe(el);
+});
+</script>
+
+
+</body></html>
