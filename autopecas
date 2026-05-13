@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agência Autopeças</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--black:#0A0A0A;--white:#fff;--gray-600:#5A5A5A;--gray-200:#E9E9E9;--accent:#FF1F4B;--accent-soft:rgba(255,31,75,.08)}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--black);line-height:1.6}
+h1,h2,h3{font-weight:800;letter-spacing:-.02em}
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.hero{padding:120px 0 100px;position:relative}
+.hero::before{content:'';position:absolute;top:-30%;right:-20%;width:700px;height:700px;background:radial-gradient(circle,var(--accent-soft) 0%,transparent 60%);filter:blur(40px);z-index:-1}
+.eyebrow{font-size:12px;text-transform:uppercase;color:var(--accent);font-weight:700;letter-spacing:.18em;margin-bottom:20px}
+h1{font-size:clamp(42px,6vw,70px);line-height:.95;margin-bottom:24px}
+.subtitle{font-size:18px;color:var(--gray-600);max-width:740px}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.card{border:1px solid var(--gray-200);border-radius:20px;padding:26px;transition:.3s}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,.06)}
+.card h3{font-size:16px;margin-bottom:6px}
+.card p{font-size:14px;color:var(--gray-600)}
+section{padding:100px 0}
+.dark{background:var(--black);color:#fff}
+.section-head{max-width:800px;margin-bottom:50px}
+.section-head h2{font-size:clamp(36px,5vw,50px);margin-bottom:14px}
+.section-head p{color:#b8b8b8;font-size:17px}
+.stats{display:flex;gap:60px;flex-wrap:wrap;margin:40px 0}
+.big-stat{font-size:clamp(48px,7vw,72px);font-weight:800;background:linear-gradient(180deg,#fff,#999);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.charts{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+.chart-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:28px}
+.chart-wrap{height:260px}
+.note{margin-top:18px;display:inline-block;font-size:13px;color:#FF4D6D;background:rgba(255,31,75,.1);padding:6px 12px;border-radius:100px}
+.market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+.metric{background:#fafafa;border:1px solid var(--gray-200);border-radius:20px;padding:26px}
+.metric-value{font-size:32px;font-weight:800;margin-bottom:6px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.feature{border:1px solid var(--gray-200);border-radius:20px;padding:24px}
+.feature h3{font-size:17px;margin-bottom:8px}
+.services-expertise{background:#D6E7D8;padding:80px 0}
+.expertise-header{text-align:center;margin-bottom:48px}
+.expertise-eyebrow{color:#3F51B5;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+.expertise-header h2{font-size:40px;color:#000}
+.expertise-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:26px;max-width:1050px;margin:0 auto}
+.expertise-card{background:#fff;border-radius:16px;padding:34px 26px;width:310px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.expertise-icon{margin-bottom:14px;height:60px;display:flex;align-items:center;justify-content:center}
+.expertise-card h3{font-size:17px;font-weight:700;margin-bottom:10px}
+.expertise-card p{font-size:14px;color:#444;line-height:1.5}
+.cta{background:#000;color:#fff;text-align:center;padding:90px 0}
+.btn{background:var(--accent);color:#fff;padding:14px 28px;border-radius:100px;text-decoration:none;font-weight:600;display:inline-block;margin-top:20px}
+@media(max-width:900px){.hero-grid,.charts,.market-grid,.features{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero"><div class="container">
+<div class="eyebrow">AUTOPEÇAS & PERFORMANCE DIGITAL</div>
+<h1>Peças que aceleram seu e-commerce.</h1>
+<p class="subtitle">O mercado brasileiro de autopeças movimentou cerca de R$120 bilhões em 2023 e deve alcançar R$126 bilhões em 2024. O e-commerce já responde por US$4,4 bilhões, crescendo 4,3% ao ano, impulsionado pela frota envelhecida e pela migração de oficinas para o digital.</p>
+<div class="hero-grid">
+<div class="card"><h3>Frota envelhecida</h3><p>Demanda por manutenção cresce naturalmente</p></div>
+<div class="card"><h3>Adoção digital</h3><p>Oficinas buscam rapidez e preço</p></div>
+<div class="card"><h3>Estoque amplo</h3><p>Mais de 80 mil clientes ativos no setor</p></div>
+</div></div></section>
+
+<!-- NÚMEROS -->
+<section class="dark"><div class="container">
+<div class="section-head">
+<h2>Números que movem o setor</h2>
+<p>Crescimento anual de aproximadamente 5% até 2025, com São Paulo representando 30% do mercado nacional.</p>
+</div>
+<div class="stats">
+<div><div class="big-stat">R$126 bi</div><div style="color:#aaa">projeção 2024</div></div>
+<div><div class="big-stat">US$4,4 bi</div><div style="color:#aaa">e-commerce de peças</div></div>
+</div>
+<div class="charts">
+<div class="chart-card"><h3 style="color:#ddd;font-size:14px;margin-bottom:12px">Faturamento total (R$ bi)</h3><div class="chart-wrap"><canvas id="fat"></canvas></div></div>
+<div class="chart-card"><h3 style="color:#ddd;font-size:14px;margin-bottom:12px">Crescimento e-commerce (% a.a.)</h3><div class="chart-wrap"><canvas id="grow"></canvas></div></div>
+</div>
+<div class="note">Quase 8% da participação global de e-commerce de peças</div>
+</div></section>
+
+<!-- MERCADO -->
+<section><div class="container">
+<div class="section-head"><h2>Por que investir em autopeças agora</h2></div>
+<div class="market-grid">
+<div class="metric"><div class="metric-value">R$120 bi</div><p>movimentado em 2023</p></div>
+<div class="metric"><div class="metric-value">+5%</div><p>crescimento anual até 2025</p></div>
+<div class="metric"><div class="metric-value">30%</div><p>participação de São Paulo</p></div>
+<div class="metric"><div class="metric-value">4,3%</div><p>CAGR do e-commerce</p></div>
+</div>
+<p style="margin-top:30px;color:#555;max-width:800px">A frota brasileira envelhecida aumenta a reposição, enquanto oficinas e consumidores migram para plataformas online buscando rapidez, preço competitivo e estoque amplo.</p>
+</div></section>
+
+<!-- FUNCIONALIDADES -->
+<section style="background:#fafafa"><div class="container">
+<h2 style="font-size:38px;margin-bottom:30px">O que implementamos para sua autopeças</h2>
+<div class="features">
+<div class="feature"><h3>Busca por Placa/Chassi</h3><p>Encontre a peça exata em segundos, reduzindo erros de aplicação</p></div>
+<div class="feature"><h3>Catálogo TecDoc Integrado</h3><p>+2,5 milhões de aplicações com fotos e especificações</p></div>
+<div class="feature"><h3>Estoque Multi-CD</h3><p>Entrega em 24h para oficinas em todo Brasil</p></div>
+<div class="feature"><h3>Portal B2B para Oficinas</h3><p>Preços diferenciados, prazo e limite de crédito</p></div>
+<div class="feature"><h3>Marketplace Integrado</h3><p>ML, Amazon, Olist com sincronização automática</p></div>
+<div class="feature"><h3>Chat Técnico com IA</h3><p>Suporte para mecânicos identificarem peças</p></div>
+</div></div></section>
+
+<!-- SERVIÇOS -->
+<section class="services-expertise"><div class="container">
+<div class="expertise-header">
+<div class="expertise-eyebrow">EXPERTISE COMPLETA</div>
+<h2>Nossos Serviços</h2>
+</div>
+<div class="expertise-grid">
+<div class="expertise-card">
+<div class="expertise-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#3F51B5"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+<h3>Consultoria em E-commerce</h3>
+<p>Conectamos sua empresa com os melhores sistemas do Mercado, entendemos o seu negócio de forma conciente levando para outro patamar.</p>
+</div>
+<div class="expertise-card">
+<div class="expertise-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="14" height="11" rx="1.5" fill="#FF9800"/><rect x="6" y="4" width="14" height="11" rx="1.5" fill="white" stroke="#FF9800" stroke-width="1.5"/></svg></div>
+<h3>Implantação de E-commerce</h3>
+<p>Desenvolvimento de projetos B2C, B2B, Atacarejo, D2C e Marketplace, nas melhores plataformas de mercado, para atingir o sucesso em seu projeto.</p>
+</div>
+<div class="expertise-card">
+<div class="expertise-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#8BC34A"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.06-.94l2.03-1.58.12-.64-1.92-3.32-.6-.22-2.39.96c-.47-.39-1.03-.7-1.63-.94L14.4 2.5 13.9 2h-3.8l-.5.42L9.24 5c-.6.24-1.16.55-1.63.94l-2.39-.96-.6.22L2.7 8.9l.12.64 2.03 1.58c-.04.3-.06.61-.06.94s.02.64.06.94L2.82 14.6l-.12.64 1.92 3.32.6.22 2.39-.96c.47.39 1.03.7 1.63.94l.36 2.54.5.42h3.8l.5-.42.36-2.54c.6-.24 1.16-.55 1.63-.94l2.39.96.6-.22 1.92-3.32-.12-.64-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 0 0 1 0 7z"/></svg></div>
+<h3>Evolução e Integrações</h3>
+<p>Pacotes de horas para evolução do seu e-commerce, desenvolvimento de funcionalidades e integração com sistemas terceiros.</p>
+</div>
+<div class="expertise-card">
+<div class="expertise-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#00C853"><path d="M5 9h2v8H5zm4-4h2v12H9zm4 6h2v6h-2zm4-8v2h2V3h-2z"/></svg></div>
+<h3>Marketing Digital</h3>
+<p>Gerenciamos toda a estratégia para prospectar, atrair e converter clientes no ambiente digital.</p>
+</div>
+<div class="expertise-card">
+<div class="expertise-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="#9C27B0"><path d="M19 3H5c-1.1 0-2.9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14H7v-2h3v2zm0-4H7v-2h3v2zm0-4H7V7h3v2zm6 8h-3v-2h3v2zm0-4h-3v-2h3v2zm0-4h-3V7h3v2z"/></svg></div>
+<h3>Site Institucional</h3>
+<p>Criamos seu Site Institucional com layout pensado no seu negócio e estrutura otimizada para os mecanismos de busca.</p>
+</div>
+</div></div></section>
+
+<!-- CTA -->
+<section class="cta"><div class="container">
+<h2>Pronto para turbinar sua autopeças no digital?</h2>
+<p>Diagnóstico gratuito com foco em conversão para oficinas e varejo.</p>
+<a href="#" class="btn">Agendar diagnóstico</a>
+</div></section>
+
+<script>
+Chart.defaults.font.family="'Inter',sans-serif";
+new Chart(document.getElementById('fat'),{type:'bar',data:{labels:['2023','2024'],datasets:[{data:[120,126],backgroundColor:['#666','#FF1F4B'],borderRadius:10}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.1)'},ticks:{callback:v=>'R$'+v+' bi'}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('grow'),{type:'line',data:{labels:['2023','2024','2025'],datasets:[{data:[4.0,4.3,4.6],borderColor:'#FF1F4B',backgroundColor:'rgba(255,31,75,.15)',tension:.4,fill:true,borderWidth:3,pointRadius:5}]},options:{plugins:{legend:{display:false}},scales:{y:{min:3.5,max:5,grid:{color:'rgba(255,255,255,.1)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+</script>
+</body>
+</html>
