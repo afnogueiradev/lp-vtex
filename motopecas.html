@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agência Motopeças</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--black:#0A0A0A;--white:#fff;--gray:#5A5A5A;--accent:#FF1F4B}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#fff;color:var(--black)}
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.hero{padding:120px 0 90px}.eyebrow{color:var(--accent);font-size:12px;text-transform:uppercase;font-weight:700;letter-spacing:.15em;margin-bottom:18px}
+h1{font-size:clamp(40px,6vw,68px);font-weight:800;margin-bottom:20px}
+.subtitle{font-size:18px;color:var(--gray);max-width:740px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px}
+.card{border:1px solid #eee;border-radius:18px;padding:22px}
+.dark{background:#000;color:#fff;padding:90px 0}
+.stats{display:flex;gap:50px;flex-wrap:wrap;margin:30px 0}
+.big{font-size:60px;font-weight:800;background:linear-gradient(180deg,#fff,#999);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.charts{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+.chart{background:rgba(255,255,255,.06);border-radius:20px;padding:20px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px 0}
+.metric{background:#fafafa;padding:22px;border-radius:16px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature{border:1px solid #eee;padding:20px;border-radius:16px}
+.services{background:#D6E7D8;padding:70px 0;text-align:center}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;max-width:1000px;margin:20px auto}
+.svc{background:#fff;width:300px;padding:28px;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.cta{background:#000;color:#fff;text-align:center;padding:80px 0}
+.btn{background:var(--accent);color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;display:inline-block;margin-top:18px}
+@media(max-width:900px){.cards,.charts,.metrics,.features{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<section class="hero"><div class="container">
+<div class="eyebrow">MOTOPEÇAS & PERFORMANCE DIGITAL</div>
+<h1>Peças que aceleram sua moto e seu e-commerce.</h1>
+<p class="subtitle">O Brasil encerrou 2024 com avanços significativos no setor de motopeças, com forte atuação da ABIMOTO em certificação e combate a irregularidades. Com frota de motos em crescimento e 23 toneladas de kits irregulares apreendidos, o mercado formal ganha espaço no digital.</p>
+<div class="cards">
+<div class="card"><h3>Certificação Inmetro</h3><p>segurança em kits de transmissão</p></div>
+<div class="card"><h3>Frota em alta</h3><p>2024 ano das duas rodas</p></div>
+<div class="card"><h3>Digitalização</h3><p>oficinas migrando para online</p></div>
+</div></div></section>
+
+<section class="dark"><div class="container">
+<h2>Números que aceleram</h2>
+<div class="stats">
+<div><div class="big">23t</div><div style="color:#aaa">kits apreendidos</div></div>
+<div><div class="big">12 mil</div><div style="color:#aaa">kits irregulares</div></div>
+</div>
+<div class="charts">
+<div class="chart"><canvas id="c1"></canvas></div>
+<div class="chart"><canvas id="c2"></canvas></div>
+</div>
+</div></section>
+
+<section><div class="container" style="padding:70px 0">
+<h2>Por que investir em motopeças agora</h2>
+<div class="metrics">
+<div class="metric"><div style="font-size:28px;font-weight:800">2024</div><p>ano do setor duas rodas</p></div>
+<div class="metric"><div style="font-size:28px;font-weight:800">ABIMOTO</div><p>atuação estratégica</p></div>
+<div class="metric"><div style="font-size:28px;font-weight:800">13ª</div><p>edição Salão Motopeças</p></div>
+<div class="metric"><div style="font-size:28px;font-weight:800">+18%</div><p>e-commerce BR 1º sem 2024</p></div>
+</div>
+</div></section>
+
+<section style="background:#fafafa;padding:70px 0"><div class="container">
+<h2>O que implementamos para motopeças</h2>
+<div class="features">
+<div class="feature"><h3>Busca por modelo/ano</h3><p>Honda, Yamaha, etc.</p></div>
+<div class="feature"><h3>Kits certificados</h3><p>destaque Inmetro</p></div>
+<div class="feature"><h3>Entrega expressa</h3><p>para motoboys</p></div>
+<div class="feature"><h3>B2B oficinas</h3><p>desconto volume</p></div>
+<div class="feature"><h3>Marketplace</h3><p>integração pronta</p></div>
+<div class="feature"><h3>Conteúdo técnico</h3><p>manutenção corrente/coroa</p></div>
+</div></div></section>
+
+<section class="services"><div class="container">
+<div style="color:#3F51B5;font-weight:700">EXPERTISE COMPLETA</div>
+<h2 style="font-size:36px;margin:10px 0 30px">Nossos Serviços</h2>
+<div class="grid">
+<div class="svc"><h3>Consultoria em E-commerce</h3><p>Conectamos sua empresa com os melhores sistemas do Mercado.</p></div>
+<div class="svc"><h3>Implantação de E-commerce</h3><p>Projetos B2C e B2B para motopeças.</p></div>
+<div class="svc"><h3>Evolução e Integrações</h3><p>Integração com ERPs e marketplaces.</p></div>
+<div class="svc"><h3>Marketing Digital</h3><p>Captação de oficinas e motociclistas.</p></div>
+<div class="svc"><h3>Site Institucional</h3><p>Otimizado para busca por peça.</p></div>
+</div></div></section>
+
+<section class="cta"><div class="container">
+<h2>Pronto para acelerar sua motopeças?</h2>
+<a href="#" class="btn">Agendar diagnóstico</a>
+</div></section>
+
+<script>
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['Regular','Irregular'],datasets:[{data:[88,12],backgroundColor:['#4CAF50','#FF1F4B']}]},options:{plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c2'),{type:'line',data:{labels:['2022','2023','2024'],datasets:[{data:[100,115,135],borderColor:'#FF1F4B',tension:.4}]},options:{plugins:{legend:{display:false}}}});
+</script>
+</body>
+</html>
