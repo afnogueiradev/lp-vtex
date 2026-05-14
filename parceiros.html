@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dotkom – Parceiros</title>
+<style>
+:root{--azul:#071B2F;--azul2:#0E2F52;--laranja:#FF6A00;--areia:#F7F5F2;--borda:#E6ECF2}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#0f172a}
+.container{max-width:1200px;margin:0 auto;padding:0 28px}
+
+/* HERO */
+.hero{position:relative;padding:110px 0 90px;background:radial-gradient(900px 500px at 85% -10%,rgba(255,106,0,.18),transparent 60%),linear-gradient(180deg,var(--azul) 0%,var(--azul2) 100%);color:#fff;overflow:hidden}
+.hero h1{font-size:clamp(38px,5.5vw,64px);line-height:1.05;font-weight:800;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#fff,#FFD5B8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin-top:18px;font-size:19px;color:#D7E3F0;max-width:720px;line-height:1.6}
+.badge{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.9;margin-bottom:16px}
+
+/* SECTION */
+section{padding:84px 0}
+.kicker{color:var(--laranja);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:13px;margin-bottom:10px}
+h2{font-size:clamp(26px,3.2vw,40px);color:var(--azul);margin-bottom:12px}
+.desc{color:#475569;font-size:17px;max-width:720px;line-height:1.6}
+
+/* GRID PARTNERS */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:32px}
+.card{position:relative;background:#fff;border:1px solid var(--borda);border-radius:16px;padding:28px 20px;height:110px;display:flex;align-items:center;justify-content:center;transition:.25s;overflow:hidden}
+.card:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,106,0,.08),transparent 50%);opacity:0;transition:.25s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(7,27,47,.08);border-color:#D4DEE8}
+.card:hover:before{opacity:1}
+.logo{font-weight:700;color:#0f172a;letter-spacing:-.01em;text-align:center}
+.logo span{color:#94a3b8;font-weight:500;font-size:13px;display:block;margin-top:4px}
+
+/* VARIANTS */
+.section-alt{background:var(--areia)}
+.pill-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.pill{background:#fff;border:1px solid var(--borda);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px}
+
+/* CTA */
+.cta{margin-top:60px;background:linear-gradient(180deg,#fff,#F8FAFC);border:1px solid var(--borda);border-radius:24px;padding:40px;text-align:center}
+.cta h3{font-size:24px;color:var(--azul);margin-bottom:8px}
+.cta p{color:#475569;margin-bottom:18px}
+.btn{display:inline-block;background:var(--laranja);color:#0b1220;padding:13px 22px;border-radius:12px;font-weight:700;text-decoration:none}
+
+@media(max-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}.container{padding:0 20px}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge">Ecossistema Dotkom</div>
+    <h1>Parceiros que <em>aceleram</em> cada etapa do seu e-commerce</h1>
+    <p>Trabalhamos com as principais plataformas, ERPs, meios de pagamento e CRMs do mercado para entregar uma operação integrada, sem fricção e pronta para escalar.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="kicker">Plataformas de E-commerce</div>
+    <h2>Base sólida para vender mais</h2>
+    <p class="desc">Homologamos as plataformas mais usadas no Brasil para implantação e evolução. A página original lista 10 parceiros — aqui estão os principais citados pela Dotkom.</p>
+    <div class="grid">
+      <div class="card"><div class="logo">Wake<span>TrayCorp</span></div></div>
+      <div class="card"><div class="logo">VTEX</div></div>
+      <div class="card"><div class="logo">Tray</div></div>
+      <div class="card"><div class="logo">Nuvemshop</div></div>
+      <div class="card"><div class="logo">Yampi</div></div>
+      <div class="card"><div class="logo">WooCommerce</div></div>
+      <div class="card"><div class="logo">Loja Integrada</div></div>
+      <div class="card"><div class="logo">Shopify<span>parceiro</span></div></div>
+      <div class="card"><div class="logo">Magento<span>parceiro</span></div></div>
+      <div class="card"><div class="logo">+1 plataforma</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="kicker">ERPs</div>
+    <h2>Gestão integrada do pedido ao estoque</h2>
+    <p class="desc">A seção de ERPs do site exibe 8 logos parceiros. Mantive o layout pronto para você substituir pelos logos oficiais.</p>
+    <div class="grid">
+      <div class="card"><div class="logo">ERP<span>Parceiro 1</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 2</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 3</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 4</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 5</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 6</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 7</span></div></div>
+      <div class="card"><div class="logo">ERP<span>Parceiro 8</span></div></div>
+    </div>
+    <div class="pill-row">
+      <div class="pill">Integração nativa</div>
+      <div class="pill">Estoque em tempo real</div>
+      <div class="pill">NF-e automática</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="kicker">Meios de Pagamento</div>
+    <h2>Conversão sem atrito no checkout</h2>
+    <p class="desc">São 7 parceiros de pagamento listados na página original. Estruturei os cards para receber os logos.</p>
+    <div class="grid">
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 1</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 2</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 3</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 4</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 5</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 6</span></div></div>
+      <div class="card"><div class="logo">Pagamento<span>Parceiro 7</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="kicker">CRM & Marketing</div>
+    <h2>Relacionamento que gera recompra</h2>
+    <p class="desc">A área de CRM exibe 3 parceiros no site atual.</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><div class="logo">CRM<span>Parceiro 1</span></div></div>
+      <div class="card"><div class="logo">CRM<span>Parceiro 2</span></div></div>
+      <div class="card"><div class="logo">CRM<span>Parceiro 3</span></div></div>
+    </div>
+
+    <div class="cta">
+      <h3>Quer indicar um parceiro ou se tornar um?</h3>
+      <p>Fale com um especialista e integre sua solução ao ecossistema Dotkom.</p>
+      <a href="#" class="btn">Falar no WhatsApp →</a>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
